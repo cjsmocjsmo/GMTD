@@ -9,5 +9,6 @@ const config = {
 	}
 };
 
+//another useless comment
 //not needed comment
 export default config;
