@@ -1,7 +1,8 @@
 <script>
 	import { quintOut } from 'svelte/easing';
 	import { crossfade } from 'svelte/transition';
-	import { flip } from 'svelte/animate';
+	import { get } from 'svelte/store'
+	import { todos } from './stores'
 
 	const [send, receive] = crossfade({
 		fallback(node, params) {
@@ -19,16 +20,12 @@
 		}
 	});
 
-	let todos = [
-		{ id: 1, done: false, description: 'write some docs' },
-		{ id: 2, done: false, description: 'start writing JSConf talk' },
-		{ id: 3, done: true, description: 'buy some milk' },
-		{ id: 4, done: false, description: 'mow the lawn' },
-		{ id: 5, done: false, description: 'feed the turtle' },
-		{ id: 6, done: false, description: 'fix some bugs' },
-	];
+	let todoListt = get(todos)
+	let todoList = JSON.parse(todoListt)
+	
+	console.log(todoList[0])
 
-	let uid = todos.length + 1;
+	let uid = todoList.length + 1;
 
 	function add(input) {
 		const todo = {
@@ -36,13 +33,19 @@
 			done: false,
 			description: input.value
 		};
-
-		todos = [todo, ...todos];
+		todoList = [todo, ...todoList];
+		console.log(todoList)
+		let newtodoListString = JSON.stringify(todoList)
+		todos.set(newtodoListString)
 		input.value = '';
 	}
 
 	function remove(todo) {
-		todos = todos.filter(t => t !== todo);
+		todoList = todoList.filter(t => t !== todo);
+		let newtodoList = JSON.stringify(todoList)
+		console.log(todoList)
+		todos.set(newtodoList)
+		console.log(newtodoList)
 	}
 </script>
 
@@ -57,31 +60,34 @@
 
 	<div class='left'>
 		<h2>todo</h2>
-		{#each todos.filter(t => !t.done) as todo (todo.id)}
-			<label
-				in:receive="{{key: todo.id}}"
-				out:send="{{key: todo.id}}"
-				animate:flip
-			>
-				<input type=checkbox bind:checked={todo.done}>
-				{todo.description}
-				<button on:click="{() => remove(todo)}">x</button>
-			</label>
+		{#each todoList as todo (todo.id)}
+			{#if !todo.done }
+				<label
+					in:receive="{{key: todo.id}}"
+					out:send="{{key: todo.id}}"
+					
+				>
+					<input type=checkbox bind:checked={todo.done}>
+					{todo.description}
+					<button on:click="{() => remove(todo)}">x</button>
+				</label>
+			{/if}
 		{/each}
 	</div>
 
 	<div class='right'>
 		<h2>done</h2>
-		{#each todos.filter(t => t.done) as todo (todo.id)}
+		{#each todoList as todo (todo.id)}
+			{#if todo.done}
 			<label
 				in:receive="{{key: todo.id}}"
 				out:send="{{key: todo.id}}"
-				animate:flip
 			>
 				<input type=checkbox bind:checked={todo.done}>
 				{todo.description}
 				<button on:click="{() => remove(todo)}">x</button>
 			</label>
+			{/if}
 		{/each}
 	</div>
 </div>
