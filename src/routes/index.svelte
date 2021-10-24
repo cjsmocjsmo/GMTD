@@ -49,7 +49,7 @@
 	}
 </script>
 
-<h1>GrandMa's ToDo's</h1>
+<h1>My ToDo's</h1>
 
 <div class='board'>
 	<input
